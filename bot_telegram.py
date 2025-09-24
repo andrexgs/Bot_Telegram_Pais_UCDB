@@ -8,7 +8,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import sys
 import numpy as np
 from tensorflow.keras.models import load_model
-
+import random
 
 """
     CONFIGURAÇÃO DO BOT
@@ -82,11 +82,41 @@ async def processa_imagem(update, context):
         class_name = class_names[index]
         confidence_score = prediction[0][index]
 
+        # --- LÓGICA DO JOGO JOKENPO ---
+        usuario_jogou = class_name[2:].strip()
+        
+        if usuario_jogou == "Nenhum(a)":
+            resposta = (
+                f'Não identifiquei uma jogada válida (classificado como *Nenhum*).\n'
+                f'Confiança da classificação: *{confidence_score:.2%}*'
+            )
+            await update.message.reply_text(resposta, parse_mode='Markdown')
+            return
+        
+        escolha_aleatoria = random.choice(class_names)
+        bot_jogou = escolha_aleatoria[2:].strip()
+        
+        while bot_jogou == "Nenhum(a)":
+            escolha_aleatoria = random.choice(class_names)
+            bot_jogou = escolha_aleatoria[2:].strip()
+    
+        # Determina o resultado
+        resultado = ""
+        if usuario_jogou == bot_jogou:
+            resultado = "Resultado: *Empate!* 😐"
+        elif (usuario_jogou == "Pedra" and bot_jogou == "Tesoura") or \
+             (usuario_jogou == "Tesoura" and bot_jogou == "Papel") or \
+             (usuario_jogou == "Papel" and bot_jogou == "Pedra"):
+            resultado = "Resultado: *Você venceu!* 🎉"
+        else:
+            resultado = "Resultado: *Você perdeu!* 😢"
+        
         # --- ENVIO DA RESPOSTA ---
-        classe_limpa = class_name[2:].strip()
         resposta = (
-            f'Classificação: *{classe_limpa}*\n'
-            f'Confiança: *{confidence_score:.2%}*'
+            f'Você jogou: *{usuario_jogou}*\n'
+            f'O bot jogou: *{bot_jogou}*\n\n'
+            f'{resultado}\n\n'
+            f'(Confiança da sua jogada: {confidence_score:.2%})'
         )
         await update.message.reply_text(resposta, parse_mode='Markdown')
 

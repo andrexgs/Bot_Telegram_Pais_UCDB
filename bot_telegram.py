@@ -1,17 +1,18 @@
-# Exemplo de um chatbot para Telegram com classificação de imagens (Teachable Machine)
-# ATUALIZADO PARA A VERSÃO 20+ DA BIBLIOTECA PYTHON-TELEGRAM-BOT
-
+"""
+    IMPORTAÇÃO DAS BIBLIOTECAS
+"""
 from PIL import Image
 import os
 import logging
-# ALTERADO: Importações atualizadas para a nova versão da biblioteca
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import sys
 import numpy as np
 from tensorflow.keras.models import load_model
 
-# --- CONFIGURAÇÃO ---
 
+"""
+    CONFIGURAÇÃO DO BOT
+"""
 # Lê o token como parâmetro
 if len(sys.argv) < 2:
     print("Erro: Forneça o token do seu bot como um argumento na linha de comando.")
@@ -30,24 +31,25 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- CARREGAMENTO DO MODELO DE IA (FEITO APENAS UMA VEZ) ---
+
+"""
+    CARREGAMENTO DO MODELO DE IA
+"""
 print("Carregando modelo do Teachable Machine...")
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 model = load_model('keras_model.h5', compile=False)
 class_names = open('labels.txt', 'r', encoding='utf-8').readlines()
 print("Modelo carregado com sucesso.")
 
-# --- FUNÇÕES DE RESPOSTA (HANDLERS) ---
-# ALTERADO: As funções agora são assíncronas (async) e os parâmetros mudaram um pouco
+
+"""
+    FUNÇÕES DE RESPOSTA (HANDLERS)
+"""
 async def start(update, context):
-    await update.message.reply_text('Olá! Me envie uma imagem e eu vou tentar classificá-la.')
+    await update.message.reply_text('Olá! Me envie uma imagem da sua mão fazendo uma das combinações do jokenpo e eu vou tentar classificá-la.')
 
 async def help_command(update, context):
     await update.message.reply_text('Este bot classifica imagens usando um modelo de IA. Apenas me envie uma foto.')
-
-async def echo(update, context):
-    resposta = 'Você disse: ' + update.message.text + ' ?'
-    await update.message.reply_text(resposta)
 
 async def processa_imagem(update, context):
     # Cria o diretório se ele não existir
@@ -92,24 +94,22 @@ async def processa_imagem(update, context):
         logger.error(f"Erro ao processar imagem: {e}")
         await update.message.reply_text("Ocorreu um erro ao classificar sua imagem. Tente novamente.")
 
-# --- FUNÇÃO PRINCIPAL ---
+
+"""
+    FUNÇÃO PRINCIPAL
+"""
 def main():
-    # ALTERADO: A inicialização do bot agora usa Application.builder()
+    #   A inicialização do bot agora usa Application.builder()
     application = Application.builder().token(MEU_TOKEN).build()
     
     print("Bot configurado. Aguardando mensagens...")
 
-    # ALTERADO: Adiciona os handlers diretamente no 'application'
+    #   Adiciona os handlers diretamente no 'application'
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
-    
-    # ALTERADO: Filters.text se torna filters.TEXT (maiúsculas)
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-    
-    # ALTERADO: Filters.photo se torna filters.PHOTO (maiúsculas)
     application.add_handler(MessageHandler(filters.PHOTO, processa_imagem))
 
-    # ALTERADO: O bot é iniciado com run_polling()
+    #   O bot é iniciado com run_polling()
     application.run_polling()
 
 

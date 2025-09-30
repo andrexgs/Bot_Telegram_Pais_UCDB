@@ -1,3 +1,19 @@
-Modelo-PPT/
 Dataset-PPT/
+Imagens_Processadas_Sem_F*/
 Telegram_Imagens_Recebidas/
+
+# Ignorar arquivos de cache e compilados do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar arquivos de ambiente virtual do Python
+venv/
+.venv/
+env/
+.env/
+
+# Ignorar arquivos específicos de IDEs
+.idea/
+.vscode/

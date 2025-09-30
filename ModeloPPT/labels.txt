@@ -1,4 +1,0 @@
-0 Pedra
-1 Papel
-2 Tesoura
-3 Nenhum(a)
